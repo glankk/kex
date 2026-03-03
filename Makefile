@@ -43,6 +43,7 @@ checkout-tests:
 
 configure-tests: build-llvm checkout-tests | $(TESTS_BUILDDIR)
 	cmake \
+		-G Ninja \
 		-DCMAKE_C_COMPILER=$(LLVM_BUILDDIR)bin/clang \
 		-C $(TESTS_SRCDIR)cmake/caches/O3.cmake \
 		-S $(TESTS_SRCDIR) \
