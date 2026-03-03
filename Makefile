@@ -18,7 +18,7 @@ all: build-tests
 	mkdir -p $(@)
 
 checkout-llvm:
-	git clone -C $(LLVM_SRCDIR) --revision=$(LLVM_REV) $(LLVM_URL)
+	git clone --revision=$(LLVM_REV) $(LLVM_URL) $(LLVM_SRCDIR)
 	touch $(@)
 
 configure-llvm: checkout-llvm | $(LLVM_BUILDDIR)
@@ -38,7 +38,7 @@ build-llvm: configure-llvm
 	touch $(@)
 
 checkout-tests:
-	git clone -C $(TESTS_SRCDIR) --revision=$(TESTS_REV) $(TESTS_URL)
+	git clone --revision=$(TESTS_REV) $(TESTS_URL) $(TESTS_SRCDIR)
 	touch $(@)
 
 configure-tests: build-llvm checkout-tests | $(TESTS_BUILDDIR)
