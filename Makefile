@@ -1,12 +1,12 @@
 SRCDIR := $(shell pwd)/
 
 LLVM_URL=git@github.com:llvm/llvm-project.git
-LLVM_REV=e0182ebd
+LLVM_REV=df1a53ae242418f5ac22adb5bb2178d3f931565f
 LLVM_SRCDIR=$(SRCDIR)llvm-project/
 LLVM_BUILDDIR=$(SRCDIR)llvm-project-build/
 
 TESTS_URL=git@github.com:llvm/llvm-test-suite.git
-TESTS_REV=0007314
+TESTS_REV=27d20d98b98db45217ec9a81d5b09c91d6f4370e
 TESTS_SRCDIR=$(SRCDIR)llvm-test-suite/
 TESTS_BUILDDIR=$(SRCDIR)llvm-test-suite-build/
 
