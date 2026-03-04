@@ -9,13 +9,19 @@ TESTS_URL=git@github.com:llvm/llvm-test-suite.git
 TESTS_REV=27d20d98b98db45217ec9a81d5b09c91d6f4370e
 TESTS_SRCDIR=$(SRCDIR)llvm-test-suite/
 TESTS_BUILDDIR=$(SRCDIR)llvm-test-suite-build/
+TESTS_CONFIGS=greedy pbqb
+CONFIGURE_TESTS=$(TESTS_CONFIGS:%=configure-tests-%)
+BUILD_TESTS=$(TESTS_CONFIGS:%=build-tests-%)
 
 .PHONY: all clean distclean
 
 all: build-tests
 
 clean:
-	rm -f checkout-llvm configure-llvm build-llvm checkout-tests configure-tests-greedy build-tests-greedy
+	rm -f \
+		checkout-llvm checkout-tests \
+		configure-llvm $(CONFIGURE_TESTS) \
+		build-llvm $(BUILD_TESTS)
 
 distclean:
 	rm -rf $(LLVM_SRCDIR) $(LLVM_BUILDDIR) $(TESTS_SRCDIR) $(TESTS_BUILDDIR)
@@ -47,13 +53,12 @@ checkout-tests:
 	git clone --revision=$(TESTS_REV) $(TESTS_URL) $(TESTS_SRCDIR)
 	touch $(@)
 
-.PHONY: build-tests
+.PHONY: configure-tests build-tests
 
-build-tests: build-tests-greedy
+configure-tests: $(CONFIGURE_TESTS)
+build-tests: $(BUILD_TESTS)
 
-.NOTINTERMEDIATE: configure-tests-% build-tests-%
-
-configure-tests-%: build-llvm checkout-tests | $(TESTS_BUILDDIR)%/
+$(CONFIGURE_TESTS): configure-tests-%: build-llvm checkout-tests | $(TESTS_BUILDDIR)%/
 	cmake \
 		-G Ninja \
 		-DCMAKE_C_COMPILER=$(LLVM_BUILDDIR)bin/clang \
@@ -65,6 +70,6 @@ configure-tests-%: build-llvm checkout-tests | $(TESTS_BUILDDIR)%/
 		-B $(TESTS_BUILDDIR)$(@:configure-tests-%=%)/
 	touch $(@)
 
-build-tests-%: configure-tests-%
+$(BUILD_TESTS): build-tests-%: configure-tests-%
 	ninja -C $(TESTS_BUILDDIR)$(@:build-tests-%=%)/
 	touch $(@)
