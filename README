@@ -2,6 +2,7 @@ Requirements:
 - CMake
 - Ninja
 - Make
+- Python
 - C compiler
 - mold
 - Tcl
