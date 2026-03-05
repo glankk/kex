@@ -1,0 +1,7 @@
+Requirements:
+- CMake
+- Ninja
+- Make
+- C compiler
+- mold
+- Tcl

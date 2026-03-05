@@ -1,21 +1,23 @@
-SRCDIR := $(shell pwd)/
+SRCDIR:=$(shell pwd)/
+BUILDDIR:=$(shell pwd)/
 
 LLVM_URL=git@github.com:llvm/llvm-project.git
 LLVM_REV=df1a53ae242418f5ac22adb5bb2178d3f931565f
-LLVM_SRCDIR=$(SRCDIR)llvm-project/
-LLVM_BUILDDIR=$(SRCDIR)llvm-project-build/
+LLVM_SRCDIR=$(BUILDDIR)llvm-project/
+LLVM_BUILDDIR=$(BUILDDIR)llvm-project-build/
 
 TESTS_URL=git@github.com:llvm/llvm-test-suite.git
 TESTS_REV=27d20d98b98db45217ec9a81d5b09c91d6f4370e
-TESTS_SRCDIR=$(SRCDIR)llvm-test-suite/
-TESTS_BUILDDIR=$(SRCDIR)llvm-test-suite-build/
-TESTS_CONFIGS=greedy pbqb
+TESTS_SRCDIR=llvm-test-suite/
+TESTS_BUILDDIR=llvm-test-suite-build/
+TESTS_CONFIGS=fast basic greedy pbqb
 CONFIGURE_TESTS=$(TESTS_CONFIGS:%=configure-tests-%)
 BUILD_TESTS=$(TESTS_CONFIGS:%=build-tests-%)
+RUN_TESTS=$(TESTS_CONFIGS:%=results-tests-%.json)
 
 .PHONY: all clean distclean
 
-all: build-tests
+all: run-tests
 
 clean:
 	rm -f \
@@ -41,6 +43,7 @@ configure-llvm: checkout-llvm | $(LLVM_BUILDDIR)
 		-DLLVM_ENABLE_ASSERTIONS=ON \
 		-DLLVM_FORCE_ENABLE_STATS=ON \
 		-DLLVM_ENABLE_PROJECTS=clang \
+		-DLLVM_ENABLE_RUNTIMES=all \
 		-S $(LLVM_SRCDIR)llvm \
 		-B $(LLVM_BUILDDIR)
 	touch $(@)
@@ -53,10 +56,11 @@ checkout-tests:
 	git clone --revision=$(TESTS_REV) $(TESTS_URL) $(TESTS_SRCDIR)
 	touch $(@)
 
-.PHONY: configure-tests build-tests
+.PHONY: configure-tests build-tests run-tests
 
 configure-tests: $(CONFIGURE_TESTS)
 build-tests: $(BUILD_TESTS)
+run-tests: $(RUN_TESTS)
 
 $(CONFIGURE_TESTS): configure-tests-%: build-llvm checkout-tests | $(TESTS_BUILDDIR)%/
 	cmake \
@@ -73,3 +77,6 @@ $(CONFIGURE_TESTS): configure-tests-%: build-llvm checkout-tests | $(TESTS_BUILD
 $(BUILD_TESTS): build-tests-%: configure-tests-%
 	ninja -C $(TESTS_BUILDDIR)$(@:build-tests-%=%)/
 	touch $(@)
+
+$(RUN_TESTS): results-tests-%.json: build-tests-%
+	$(LLVM_BUILDDIR)bin/llvm-lit -v -j 1 -o $(@) $(TESTS_BUILDDIR)$(@:results-tests-%.json=%)/
