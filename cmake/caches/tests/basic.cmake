@@ -1,2 +1,0 @@
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -mllvm=-regalloc=basic" CACHE STRING "")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -mllvm=-regalloc=basic" CACHE STRING "")

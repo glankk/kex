@@ -1,12 +1,12 @@
 SRCDIR:=$(shell pwd)/
 BUILDDIR:=$(shell pwd)/
 
-LLVM_URL=git@github.com:llvm/llvm-project.git
+LLVM_URL=https://github.com/llvm/llvm-project.git
 LLVM_REV=df1a53ae242418f5ac22adb5bb2178d3f931565f
 LLVM_SRCDIR=$(BUILDDIR)llvm-project/
 LLVM_BUILDDIR=$(BUILDDIR)llvm-project-build/
 
-TESTS_URL=git@github.com:llvm/llvm-test-suite.git
+TESTS_URL=https://github.com/llvm/llvm-test-suite.git
 TESTS_REV=27d20d98b98db45217ec9a81d5b09c91d6f4370e
 TESTS_SRCDIR=llvm-test-suite/
 TESTS_BUILDDIR=llvm-test-suite-build/
@@ -32,7 +32,12 @@ distclean:
 	mkdir -p $(@)
 
 checkout-llvm:
-	git clone --revision=$(LLVM_REV) $(LLVM_URL) $(LLVM_SRCDIR)
+	git clone --revision=$(LLVM_REV) $(LLVM_URL) $(LLVM_SRCDIR) || \
+	( \
+		git clone --depth=1 $(LLVM_URL) $(LLVM_SRCDIR) && \
+		git -C $(LLVM_SRCDIR) fetch --depth=1 origin $(LLVM_REV) && \
+		git -C $(LLVM_SRCDIR) checkout $(LLVM_REV) \
+	)
 	touch $(@)
 
 configure-llvm: checkout-llvm | $(LLVM_BUILDDIR)
@@ -53,7 +58,12 @@ build-llvm: configure-llvm
 	touch $(@)
 
 checkout-tests:
-	git clone --revision=$(TESTS_REV) $(TESTS_URL) $(TESTS_SRCDIR)
+	git clone --revision=$(TESTS_REV) $(TESTS_URL) $(TESTS_SRCDIR) || \
+	( \
+		git clone --depth=1 $(TESTS_URL) $(TESTS_SRCDIR) && \
+		git -C $(TESTS_SRCDIR) fetch --depth=1 origin $(TESTS_REV) && \
+		git -C $(TESTS_SRCDIR) checkout $(TESTS_REV) \
+	)
 	touch $(@)
 
 .PHONY: configure-tests build-tests run-tests
@@ -68,8 +78,7 @@ $(CONFIGURE_TESTS): configure-tests-%: build-llvm checkout-tests | $(TESTS_BUILD
 		-DCMAKE_C_COMPILER=$(LLVM_BUILDDIR)bin/clang \
 		-DTEST_SUITE_COLLECT_STATS=ON \
 		-DTEST_SUITE_BENCHMARKING_ONLY=ON \
-		-C $(TESTS_SRCDIR)cmake/caches/O3.cmake \
-		-C $(SRCDIR)cmake/caches/tests/$(@:configure-tests-%=%).cmake \
+		-C $(SRCDIR)cmake/caches/Release-$(@:configure-tests-%=%).cmake \
 		-S $(TESTS_SRCDIR) \
 		-B $(TESTS_BUILDDIR)$(@:configure-tests-%=%)/
 	touch $(@)
