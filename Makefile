@@ -88,4 +88,4 @@ $(BUILD_TESTS): build-tests-%: configure-tests-%
 	touch $(@)
 
 $(RUN_TESTS): results-tests-%.json: build-tests-%
-	$(LLVM_BUILDDIR)bin/llvm-lit -v -j 1 -o $(@) $(TESTS_BUILDDIR)$(@:results-tests-%.json=%)/
+	$(LLVM_BUILDDIR)bin/llvm-lit -v -j 1 --ignore-fail -o $(@) $(TESTS_BUILDDIR)$(@:results-tests-%.json=%)/
