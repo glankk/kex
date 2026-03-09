@@ -10,7 +10,7 @@ TESTS_URL=https://github.com/llvm/llvm-test-suite.git
 TESTS_REV=27d20d98b98db45217ec9a81d5b09c91d6f4370e
 TESTS_SRCDIR=llvm-test-suite/
 TESTS_BUILDDIR=llvm-test-suite-build/
-TESTS_CONFIGS=fast basic greedy pbqb
+TESTS_CONFIGS=fast basic greedy pbqp
 CONFIGURE_TESTS=$(TESTS_CONFIGS:%=configure-tests-%)
 BUILD_TESTS=$(TESTS_CONFIGS:%=build-tests-%)
 RUN_TESTS=$(TESTS_CONFIGS:%=results-tests-%.json)
