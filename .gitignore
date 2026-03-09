@@ -1,0 +1,11 @@
+build-llvm
+build-tests-*
+checkout-llvm
+checkout-tests
+configure-llvm
+configure-tests-*
+llvm-project-build/
+llvm-project/
+llvm-test-suite-build/
+llvm-test-suite/
+out/
