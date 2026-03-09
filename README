@@ -6,3 +6,4 @@ Requirements:
 - C compiler
 - mold
 - Tcl
+- jq

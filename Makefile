@@ -1,5 +1,6 @@
 SRCDIR:=$(shell pwd)/
 BUILDDIR:=$(shell pwd)/
+OUTDIR=$(BUILDDIR)out/
 
 LLVM_URL=https://github.com/llvm/llvm-project.git
 LLVM_REV=df1a53ae242418f5ac22adb5bb2178d3f931565f
@@ -13,17 +14,19 @@ TESTS_BUILDDIR=llvm-test-suite-build/
 TESTS_CONFIGS=fast basic greedy pbqp
 CONFIGURE_TESTS=$(TESTS_CONFIGS:%=configure-tests-%)
 BUILD_TESTS=$(TESTS_CONFIGS:%=build-tests-%)
-RUN_TESTS=$(TESTS_CONFIGS:%=results-tests-%.json)
+RESULTS_TESTS=$(TESTS_CONFIGS:%=$(OUTDIR)llvm-test-suite-results-%.json)
 
 .PHONY: all clean distclean
 
-all: run-tests
+all: results
 
 clean:
 	rm -f \
 		checkout-llvm checkout-tests \
 		configure-llvm $(CONFIGURE_TESTS) \
-		build-llvm $(BUILD_TESTS)
+		build-llvm $(BUILD_TESTS) \
+	rm -rf \
+		$(OUTDIR)
 
 distclean:
 	rm -rf $(LLVM_SRCDIR) $(LLVM_BUILDDIR) $(TESTS_SRCDIR) $(TESTS_BUILDDIR)
@@ -87,5 +90,12 @@ $(BUILD_TESTS): build-tests-%: configure-tests-%
 	ninja -C $(TESTS_BUILDDIR)$(@:build-tests-%=%)/
 	touch $(@)
 
-$(RUN_TESTS): results-tests-%.json: build-tests-%
-	$(LLVM_BUILDDIR)bin/llvm-lit -v -j 1 --ignore-fail -o $(@) $(TESTS_BUILDDIR)$(@:results-tests-%.json=%)/
+$(RESULTS_TESTS): $(OUTDIR)llvm-test-suite-results-%.json: build-tests-% | $(OUTDIR)
+	$(LLVM_BUILDDIR)bin/llvm-lit -v -j 1 --ignore-fail -o $(@) $(TESTS_BUILDDIR)$(@:$(OUTDIR)llvm-test-suite-results-%.json=%)/
+
+.PHONY: results
+
+results: $(OUTDIR)results.json
+
+$(OUTDIR)results.json: $(RESULTS_TESTS) | $(OUTDIR)
+	jq -n -f results-filter.json $(^) --args $(^:$(OUTDIR)llvm-test-suite-results-%.json=%) >$(@)
