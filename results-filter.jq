@@ -7,6 +7,7 @@
 	results: $runs | map(. as $run | $run.results.tests.[] | select(.name == $name) as $result | {
 		config: $run.config,
 		elapsed: $result.elapsed,
-		spills: $result.metrics.["regalloc.NumSpills"]
+		spills: $result.metrics.["regalloc.NumSpills"],
+		code: $result.code
 	})
 })
