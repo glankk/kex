@@ -14,14 +14,12 @@ TEST_RESULTS	= $(TEST_CONFIGS:%=out/results-%.json)
 all: results
 
 clean:
-	rm -f \
-		checkout-llvm checkout-tests \
-		configure-llvm $(CONFIGURE_TESTS) \
-		build-llvm $(BUILD_TESTS) \
-	rm -rf \
-		out
+	rm -rf out
 
 distclean:
+	rm -f checkout-llvm checkout-tests \
+		configure-llvm $(CONFIGURE_TESTS) \
+		build-llvm $(BUILD_TESTS)
 	rm -rf llvm-project llvm-test-suite build
 
 %/:
