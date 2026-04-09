@@ -1,6 +1,6 @@
 [ foreach inputs as $item (0; .+1; {config: $ARGS.positional[.-1], results: $item}) ]
 | . as $runs
-| [$runs[].results.tests.[] | select(.metrics.["regalloc.NumSpills"] != null) | .name]
+| [$runs[].results.tests.[] | .name]
 | unique
 | map(. as $name | {
 	name: $name,
